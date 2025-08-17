@@ -2,11 +2,8 @@
   "name": "chat-app",
   "private": true,
   "scripts": {
-    "postinstall": "cd client && npm install && npm run build",
-    "start": "cd server && node src/index.js",
-    "dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run dev\""
+    "postinstall": "cd client && npm install && npm run build && cd .. && cd server && npm install",
+    "start": "cd server && node src/index.js"
   },
-  "dependencies": {
-    "concurrently": "^8.2.2"
-  }
+  "dependencies": {}
 }
