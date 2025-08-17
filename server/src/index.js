@@ -19,17 +19,37 @@ app.use(cookieParser())
 // Configure CORS: support CLIENT_URLS (comma-separated) or CLIENT_URL (single)
 const rawClientUrls = process.env.CLIENT_URLS || process.env.CLIENT_URL || '';
 const allowedOrigins = rawClientUrls.split(',').map(s => s.trim()).filter(Boolean);
+const isProduction = process.env.NODE_ENV === 'production';
 
+/*
+ * CORS policy:
+ * - If no Origin header (server-to-server, curl) -> allow
+ * - If CLIENT_URL(S) configured -> only allow those origins
+ * - If CLIENT_URL(S) not configured:
+ *     - in production: reject cross-origin browser requests (safer)
+ *     - in non-production: allow dynamic origins (convenience for local/testing)
+ */
 const corsOptions = {
     origin: function(origin, callback) {
         // Allow requests with no origin (like server-to-server or curl)
         if (!origin) return callback(null, true);
 
-        // If no allowed origins configured, allow any origin
-        if (allowedOrigins.length === 0) return callback(null, true);
+        // If allowed origins configured, check list
+        if (allowedOrigins.length > 0) {
+            if (allowedOrigins.includes(origin)) return callback(null, true);
+            return callback(new Error('CORS policy: origin not allowed'));
+        }
 
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        return callback(new Error('CORS policy: origin not allowed'));
+        // No allowed origins configured
+        if (isProduction) {
+            // In production we require explicit CLIENT_URL(S) — deny cross-origin requests
+            console.warn('CORS: no CLIENT_URL(S) configured in production — rejecting origin:', origin);
+            return callback(new Error('CORS policy: no CLIENT_URL(S) configured'));
+        }
+
+        // Non-production: allow dynamic origin but log for auditing
+        console.log('CORS: allowing dynamic origin (no CLIENT_URL(S) configured):', origin);
+        return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -41,7 +61,7 @@ app.use(cors(corsOptions));
 // Preflight support for all routes
 app.options('*', cors(corsOptions));
 
-console.log('CORS allowed origins:', allowedOrigins.length ? allowedOrigins : 'all (no CLIENT_URL/CUSTOM configured)');
+console.log('CORS allowed origins:', allowedOrigins.length ? allowedOrigins : (isProduction ? 'NONE (production - must set CLIENT_URL(S))' : 'dynamic (no CLIENT_URL/CUSTOM configured)'));
 
 const port = process.env.PORT || 5000
 const __dirname=path.resolve()
