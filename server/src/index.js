@@ -11,7 +11,7 @@ import { app, server } from "./lib/socket.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Required because ES modules don't have __dirname by default
+// ES modules don’t have __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -29,14 +29,17 @@ const isProduction = process.env.NODE_ENV === "production";
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
+
     if (allowedOrigins.length > 0) {
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error("CORS policy: origin not allowed"));
     }
+
     if (isProduction) {
       console.warn("CORS: no CLIENT_URL(S) configured in production — rejecting:", origin);
       return callback(new Error("CORS policy: no CLIENT_URL(S) configured"));
     }
+
     console.log("CORS: allowing dynamic origin:", origin);
     return callback(null, true);
   },
@@ -49,11 +52,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
-console.log(
-  "CORS allowed origins:",
-  allowedOrigins.length ? allowedOrigins : (isProduction ? "NONE (set CLIENT_URLS)" : "dynamic (dev mode)")
-);
-
 // ----------------- API ROUTES -----------------
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
@@ -65,9 +63,9 @@ if (isProduction) {
   const clientDist = path.join(__dirname, "../client/dist");
   app.use(express.static(clientDist));
 
-  // Catch-all → React Router
+  // React Router fallback
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(clientDist, "index.html"));
+    res.sendFile(path.join(clientDist, "index.html"));
   });
 }
 
