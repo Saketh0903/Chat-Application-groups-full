@@ -6,8 +6,9 @@ Quick steps to deploy the client on Vercel
 
 1. In Vercel dashboard -> Import Project -> Select this Git repository.
 2. Set the "Root Directory" (or "Project Directory") to `client`.
-3. Build Command: `npm run build`
-4. Output Directory: `dist`
+3. Install Command (one of): `yarn install`, `pnpm install`, `npm install`, or `bun install`.
+4. Build Command (one of): `npm run vercel-build` or `npm run build`.
+5. Output Directory: `public` if it exists, otherwise `.`. (For this Vite app the build produces `dist` — you can set `dist` if you prefer.)
 5. Add Environment Variables (if your frontend calls the API):
    - `VITE_API_URL` = https://<your-api-url>
    If your client and server are served from the same origin, you can leave it unset and use relative API paths.
