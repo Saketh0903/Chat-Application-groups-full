@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "cd client && npm install && npm run build",
-    "start": "npm run build && cd server && npm install && node src/index.js",
+    "start": "cd server && node src/index.js",
     "dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run dev\""
   },
   "dependencies": {
