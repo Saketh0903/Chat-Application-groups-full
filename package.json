@@ -1,9 +1,13 @@
 {
   "name": "chat-app",
-  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "postinstall": "cd client && npm install && npm run build && cd .. && cd server && npm install",
-    "start": "cd server && node src/index.js"
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "npm run start --prefix backend"
   },
-  "dependencies": {}
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
